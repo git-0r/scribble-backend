@@ -26,7 +26,6 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: ./
           target: /var/www/myapp/
-          args: -o StrictHostKeyChecking=no
       - name: Connect to EC2 instance
         uses: appleboy/ssh-action@master
         with:
