@@ -20,9 +20,8 @@ jobs:
           npm ci
       - name: Upload code to EC2 instance
         run: |
-          ssh -o "StrictHostKeyChecking no" -i <(echo "${{ secrets.EC2_PRIVATE_KEY }}") ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p /var/www/myapp"
-          scp -o "StrictHostKeyChecking no" -i <(echo "${{ secrets.EC2_PRIVATE_KEY }}") -r ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/var/www/myapp/
+          ssh ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p /var/www/myapp"
+          scp ${{ secrets.EC2_PRIVATE_KEY }} -r ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/var/www/myapp/
       - name: Connect to EC2 instance
         run: |
-          ssh -o "StrictHostKeyChecking no" -i <(echo "${{ secrets.EC2_PRIVATE_KEY }}") ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "sudo apt-get update && sudo apt-get install -y nodejs npm && sudo npm install -g pm2 && cd /var/www/myapp/ && npm install --production"
-          ssh -o "StrictHostKeyChecking no" -i <(echo "${{ secrets.EC2_PRIVATE_KEY }}") ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "cd /var/www/myapp/ && pm2 stop myapp || true && pm2 start npm --name \"myapp\" -- start"
+          ssh ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "sudo apt-get update && sudo apt-get install -y nodejs npm && sudo npm install -g pm2 && cd /var/www/myapp/ && npm install --production && pm2 stop myapp || true && pm2 start npm --name 'myapp' -- start"
