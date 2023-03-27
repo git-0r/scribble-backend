@@ -1,0 +1,45 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16.x"
+      - name: Build and test
+        run: |
+          npm ci
+      - name: Upload code to EC2 instance
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: ./
+          target: /var/www/myapp/
+          args: -r -o StrictHostKeyChecking=no
+      - name: Connect to EC2 instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y nodejs npm
+            sudo npm install -g pm2
+            cd /var/www/myapp/
+            npm install
+          script: |
+            cd /var/www/myapp/
+            pm2 stop myapp || true
+            pm2 start npm --name "myapp" -- start
