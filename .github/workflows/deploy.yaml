@@ -19,26 +19,9 @@ jobs:
         run: |
           npm ci
       - name: Upload code to EC2 instance
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: ./
-          target: /var/www/myapp/
+        run: |
+          ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p /var/www/myapp"
+          scp -i ${{ secrets.EC2_PRIVATE_KEY }} -r ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/var/www/myapp/
       - name: Connect to EC2 instance
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y nodejs npm
-            sudo npm install -g pm2
-            cd /var/www/myapp/
-            npm install
-          script: |
-            cd /var/www/myapp/
-            pm2 stop myapp || true
-            pm2 start npm --name "myapp" -- start
+        run: |
+          ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "sudo apt-get update && sudo apt-get install -y nodejs npm && sudo npm install -g pm2 && cd /var/www/myapp/ && npm install --production && pm2 stop myapp || true && pm2 start npm --name 'myapp' -- start"
