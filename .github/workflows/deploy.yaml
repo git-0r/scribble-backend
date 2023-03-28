@@ -22,7 +22,7 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" ubuntu@ec2-3-108-194-171.ap-south-1.compute.amazonaws.com 'bash -s' << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_PRIVATE_KEY }} ubuntu@ec2-3-108-194-171.ap-south-1.compute.amazonaws.com 'bash -s' << 'EOF'
             sudo apt-get update
             sudo apt-get install -y nodejs npm 
             sudo npm install -g pm2
