@@ -18,18 +18,12 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-      - name: Setup
-        run: |
-          echo ${{ secrets.EC2_PRIVATE_KEY }} > key-pair.pem
-          chmod 400 key-pair.pem
-      - name: Connect to EC2 instance
-        run: |
-          ssh -o StrictHostKeyChecking=no -v -i "key-pair.pem" ubuntu@ec2-3-108-194-171.ap-south-1.compute.amazonaws.com 'bash -s' << 'EOF'
-            sudo apt-get update
-            sudo apt-get install -y nodejs npm 
-            sudo npm install -g pm2
-            sudo mkdir -p /var/www
-            cd /var/www && git clone https://github.com/git-0r/scribble-backend.git
-            cd scribble-backend
-            npm ci && pm2 stop scribble-backend || true && pm2 start npm --name 'scribble-backend' -- start
-          EOF'
+      - name: SSH into EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          port: 22
+          script: |
+            sudo apt update
