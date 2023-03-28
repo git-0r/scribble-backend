@@ -18,11 +18,13 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_PRIVATE_KEY }}
       - name: Connect to EC2 instance
-        env:
-          EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         run: |
-          ssh -o StrictHostKeyChecking=no -v -i ${{ secrets.EC2_PRIVATE_KEY }} ubuntu@ec2-3-108-194-171.ap-south-1.compute.amazonaws.com 'bash -s' << 'EOF'
+          ssh -o StrictHostKeyChecking=no -v -i ubuntu@ec2-3-108-194-171.ap-south-1.compute.amazonaws.com 'bash -s' << 'EOF'
             sudo apt-get update
             sudo apt-get install -y nodejs npm 
             sudo npm install -g pm2
