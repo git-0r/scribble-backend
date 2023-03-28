@@ -18,13 +18,16 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-      - name: Upload code to EC2 instance
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.EC2_HOST }}
-          REMOTE_USER: ${{ secrets.EC2_USERNAME }}
-          TARGET: /var/www/myapp
       - name: Connect to EC2 instance
+        env:
+          SSH_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         run: |
-          ssh ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "sudo apt-get update && sudo apt-get install -y nodejs npm && sudo npm install -g pm2 && cd /var/www/myapp/ && npm install --production && pm2 stop myapp || true && pm2 start npm --name 'myapp' -- start"
+          ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" ubuntu@ec2-3-108-194-171.ap-south-1.compute.amazonaws.com 'bash -s' << 'EOF'
+            sudo apt-get update
+            sudo apt-get install -y nodejs npm 
+            sudo npm install -g pm2
+            sudo mkdir -p /var/www
+            cd /var/www && git clone https://github.com/git-0r/scribble-backend.git
+            cd scribble-backend
+            npm ci && pm2 stop scribble-backend || true && pm2 start npm --name 'scribble-backend' -- start
+          EOF'
