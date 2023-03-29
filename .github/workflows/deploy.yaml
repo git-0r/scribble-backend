@@ -26,4 +26,10 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 22
           script: |
-            sudo apt update
+            sudo apt-get update
+            sudo apt-get install -y nodejs npm 
+            sudo npm install -g pm2
+            sudo mkdir -p /var/app
+            cd /var/app && git clone https://github.com/git-0r/scribble-backend.git
+            cd scribble-backend
+            npm ci && pm2 stop scribble-backend || true && pm2 start npm --name 'scribble-backend' -- start
