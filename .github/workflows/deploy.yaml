@@ -33,4 +33,6 @@ jobs:
             cd app
             sudo git clone https://github.com/git-0r/scribble-backend.git
             cd scribble-backend
-            npm ci && pm2 stop scribble-backend || true && pm2 start npm --name 'scribble-backend' -- start
+            sudo npm ci
+            pm2 stop scribble-backend || true
+            pm2 start npm --name 'scribble-backend' -- start

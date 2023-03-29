@@ -72,6 +72,10 @@ io.on("connection", (socket) => {
   });
 });
 
+app.get("/", (req, res) => {
+  res.json({ data: "Hello!" });
+});
+
 httpServer.listen(3000, () => {
   console.log("listening on *:3000");
 });
